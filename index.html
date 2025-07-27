@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Finance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            background-image: url('https://paas-s3-broker-prod-lon-2edbd31f-65e0-4d35-9755-fde7c3b1b292.s3.amazonaws.com/images/Financial_HdD76AH.original.png');
+
+            color: #333;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .controls label {
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .controls select {
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #2c3e50;
+            border-radius: 4px;
+            margin-right: 10px;
+            min-width: 250px;
+            transition: border-color 0.3s ease;
+        }
+
+        .controls select:focus {
+            border-color: #1abc9c;
+            outline: none;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #1abc9c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .controls button:hover {
+            background-color: #16a085;
+            transform: scale(1.05);
+        }
+
+        /* Visualization Section */
+        .visualization {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #visual-container {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        #visual-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none; /* Hidden by default */
+        }
+
+        #visual-container iframe.active {
+            display: block;
+        }
+
+        /* Loader Styling */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            color: #1abc9c;
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls label,
+            .controls select,
+            .controls button {
+                margin-bottom: 10px;
+            }
+
+            #visual-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Apple Finance Dashboard</h1>
+            <p> Financial insights at a glance</p>
+        </header>
+
+        <!-- Controls Section -->
+        <section class="controls">
+            <label for="visual-select">Select Visualization:</label>
+            <select id="visual-select">
+                <option value="">--Choose an option--</option>
+                <option value="revenue">Revenue Over Time</option>
+                <option value="net_vs_operating">Net vs Operating Income</option>
+                <option value="gross_margin">Gross Profit Margin</option>
+                <option value="assets_vs_liabilities">Assets vs Liabilities</option>
+                <option value="cash_flow">Cash Flow from Operating Activities</option>
+                <option value="eps_trend">Earnings Per Share (EPS) Trend</option>
+                <option value="ratios">Liquidity & Debt Ratios</option>
+                <option value="inventory_turnover">Inventory Turnover</option>
+                <option value="research_development">Cost of Research and Development</option>
+                <option value="tax_expense">Tax Expense Over Time</option>
+            </select>
+            <button id="submit-button">Submit</button>
+        </section>
+
+        <!-- Visualization Display Area -->
+        <section class="visualization">
+            <div id="visual-container">
+                <div class="loader" id="loader">Loading...</div>
+                <iframe id="report-frame" src="" title="Apple Finance Visualization"></iframe>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitButton = document.getElementById('submit-button');
+            const selectElement = document.getElementById('visual-select');
+            const reportFrame = document.getElementById('report-frame');
+            const loader = document.getElementById('loader');
+
+            // Mapping of visualization options to their embed URLs
+            const embedUrls = {
+                'revenue': 'https://drive.google.com/file/d/1vE2dnkGJBjxf1c0_phZyO0-7rCuKB0-H/preview',
+                'net_vs_operating': 'https://drive.google.com/file/d/1Vl4yaXsIY0Bo8U7KZzRZfDa6oqUORWKL/preview',
+                'gross_margin': 'https://drive.google.com/file/d/1brk0pD4SdOtC7CD8TmAO2a4Efl63VWbg/preview',
+                'assets_vs_liabilities': 'https://drive.google.com/file/d/1sjuuuOUc8C9h-VSf4uyBOIbXxuPaRfmO/preview',
+                'cash_flow': 'https://drive.google.com/file/d/1W-BQJwsTwoUfB84KZbK8XZhGqfjh9S8O/preview',
+                'eps_trend': 'https://drive.google.com/file/d/1F1myFo7XJsPXPNOAml3sA7KL7Kdnob2S/preview',
+                'ratios': 'https://drive.google.com/file/d/1T-QXKg7z95Uxqn_I6VVQaQSbYmSPk-De/preview',
+                'inventory_turnover': 'https://drive.google.com/file/d/18ZfXYb_69S1PYOwVciz57eqijLje18mz/preview',
+                'research_development': 'https://drive.google.com/file/d/1SQILNNnl3fp-qJcuSBrB2CH3Lb-_4g5t/preview',
+                'tax_expense': 'https://drive.google.com/file/d/17SLnYIvxt9VwjrpbZeqWbKE6-ClDE08r/preview'
+            };
+
+            submitButton.addEventListener('click', () => {
+                const selectedVisual = selectElement.value;
+
+                if (selectedVisual) {
+                    // Show loader
+                    loader.style.display = 'block';
+                    reportFrame.style.display = 'none';
+
+                    // Set iframe src to the selected embed URL
+                    reportFrame.src = embedUrls[selectedVisual];
+
+                    // Show iframe once it's loaded
+                    reportFrame.onload = () => {
+                        loader.style.display = 'none';
+                        reportFrame.style.display = 'block';
+                    };
+
+                    // Handle iframe load errors
+                    reportFrame.onerror = () => {
+                        loader.style.display = 'none';
+                        alert('Failed to load the selected visualization. Please try again.');
+                    };
+                } else {
+                    alert('Please select a visualization from the dropdown.');
+                }
+            });
+
+            // Allow Enter key to trigger the submit button
+            selectElement.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    submitButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
